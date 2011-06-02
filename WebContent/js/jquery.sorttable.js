@@ -1,7 +1,7 @@
 ﻿/*!
 * sorttable
 *
-* @Version 1.0.0
+* @Version 1.0.1
 *
 * Copyright (c) 2011, Andres Koetter akottr@gmail.com, David Brink dbrink@gmail.com
 * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -17,12 +17,14 @@
     $.widget("akottr.sorttable", $.ui.sortable, {
         widgetEventPrefix: "sorttable",
         options: {
-            helper: "table"
+            helper: "table",
+            helperCells: -1
         },
         _table: null,
         _startIndex: 0,
         _endIndex: 0,
         _currentItemWidth: 0,
+        _sortCells: null,
         _createHelper: function (event) {
             var o = this.options;
 
@@ -36,29 +38,55 @@
             }
         },
         _createHelperTable: function (e, ui) {
-            var th = ui.is('th') || ui.is('td') ? ui : ui.parents('th:first,td:first');
-            var tr = th.parents('tr:first');
-            var table = tr.parents('table:first');
-            var thWidth = th.innerWidth() - parseInt(th.css('paddingLeft') || 0, 10) - parseInt(th.css('paddingRight') || 0, 10);
-            var trHeight = tr.innerHeight() - parseInt(tr.css('paddingTop') || 0, 10) - parseInt(tr.css('paddingBottom') || 0, 10);
-
+            var o = this.options, helperCells = o.helperCells;
+            var hc = ui.is('th') || ui.is('td') ? ui : ui.parents('th:first,td:first');
+            var index = hc.prevAll().length + 1
+            var hcWidth = hc.innerWidth() - parseInt(hc.css('paddingLeft') || 0, 10) - parseInt(hc.css('paddingRight') || 0, 10);
             // save sizes because <ie9 reports wrong values when display:none
-            this._currentItemWidth = thWidth;
+            this._currentItemWidth = hcWidth;
+            var table = this._table;
 
-            var thClone = th.clone();
-            thClone.width(thWidth);
-            var trClone = tr.clone().empty();
-            trClone.height(trHeight);
+            var cells = [];
+            if (helperCells == 1) {
+                cells = [hc];
+            }
+            else {
+                cells = table.children().find('>tr:not(.ui-sortable)>td:nth-child(' + index + ')');
+                if (helperCells < 0) {
+                    cells = cells.slice(0, cells.length + helperCells);
+                }
+                else if (helperCells > 1) {
+                    cells = cells.slice(0, helperCells - 1);
+                }
+                cells.splice(0, 0, hc); // insert first cell
+            }
+
+            this._sortCells = cells;
+
             var tableClone = table.clone().empty();
             tableClone.css('position', 'absolute');
             tableClone.css('width', 'auto');
             tableClone.css('height', 'auto');
             tableClone.attr('id', '');
-            thClone.appendTo(trClone.appendTo(tableClone));
+
+            for (i = 0; i < cells.length; i++) {
+                var cell = cells[i];
+                if (!(cell instanceof jQuery)) {
+                    cell = $(cell);
+                }
+                var tr = cell.parents('tr:first');
+                var cellClone = cell.clone();
+                cellClone.width(hcWidth);
+                var trClone = tr.clone().empty();
+                trClone.height(tr.innerHeight() - parseInt(tr.css('paddingTop') || 0, 10) - parseInt(tr.css('paddingBottom') || 0, 10));
+                cellClone.appendTo(trClone.appendTo(tableClone));
+            }
+
             tableClone.find().each(function () {
                 this.attr('id', ''); // clear ids on cloned table
             });
             table.before(tableClone);
+
             return tableClone;
         },
         _createPlaceholder: function (that) {
@@ -67,14 +95,28 @@
             // call base method
             $.ui.sortable.prototype._createPlaceholder.apply(this, arguments);
 
-            if ($.browser.webkit) {
-                // chrome (maybe all webkit) gets crazy when hiding a table-cell
-                this._reAttach(this.element);
-            }
-
             if (o.helper == 'table') {
+                var p = self.placeholder;
                 // force width as border will prevent width from setting even though cell has no explicit width
                 self.placeholder.width(self._currentItemWidth);
+
+                var sortCells = self._sortCells;
+                if (sortCells) {
+                    sortCells.hide();
+                    if (sortCells.length > 1) {
+                        p.attr('rowSpan', sortCells.length);
+                    }
+                }
+
+                var rowSpan = self._placeholderRowSpan;
+                if (rowSpan > 1) {
+                    p.attr('rowSpan', rowSpan);
+                }
+
+                if ($.browser.webkit) {
+                    // chrome (maybe all webkit) gets crazy when hiding a table-cell
+                    this._reAttach(this.element);
+                }
             }
         },
         _swapNodes: function (a, b) {
@@ -145,6 +187,14 @@
                 }
             }
         },
+        _sortStop: function () {
+            var _this = this;
+            return function (e, ui) {
+                if (_this._sortCells) {
+                    _this._sortCells.show();
+                }
+            }
+        },
         _create: function () {
             var el = this.element;
             if (el.is('table')) {
@@ -163,6 +213,7 @@
             // bind to start and update
             el.bind('sorttablestart', this._sortStart());
             el.bind('sorttableupdate', this._sortUpdate());
+            el.bind('sorttablestop', this._sortStop());
 
             $.ui.sortable.prototype._create.apply(this);
 
