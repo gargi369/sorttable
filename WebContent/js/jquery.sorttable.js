@@ -18,7 +18,7 @@
         widgetEventPrefix: "sorttable",
         options: {
             helper: "table",
-            helperCells: -1
+            helperCells: 1
         },
         _table: null,
         _startIndex: 0,
@@ -46,11 +46,8 @@
             this._currentItemWidth = hcWidth;
             var table = this._table;
 
-            var cells = [];
-            if (helperCells == 1) {
-                cells = [hc];
-            }
-            else {
+            var cells = $([]);
+            if (helperCells != 1) {
                 cells = table.children().find('>tr:not(.ui-sortable)>td:nth-child(' + index + ')');
                 if (helperCells < 0) {
                     cells = cells.slice(0, cells.length + helperCells);
@@ -58,8 +55,8 @@
                 else if (helperCells > 1) {
                     cells = cells.slice(0, helperCells - 1);
                 }
-                cells.splice(0, 0, hc); // insert first cell
             }
+            cells.splice(0, 0, hc); // insert first cell
 
             this._sortCells = cells;
 
