@@ -1,7 +1,7 @@
 ﻿/*!
 * sorttable
 *
-* @Version 1.0.1
+* @Version 1.0.2
 *
 * Copyright (c) 2011, David Brink dbrink@gmail.com
 * Copyright (c) 2010, Andres Koetter akottr@gmail.com
@@ -47,16 +47,26 @@
             this._currentItemWidth = hcWidth;
             var table = this._table;
 
+            var helperCellCount;
+            if (typeof helperCells == 'number') {
+                helperCellCount = helperCells;
+            }
+
             var cells = $([]);
-            if (helperCells != 1) {
+            if (helperCellCount != 1) {
                 cells = table.children().find('>tr:not(.ui-sortable)>td:nth-child(' + index + ')');
-                if (helperCells < 0) {
-                    cells = cells.slice(0, cells.length + helperCells);
+                if (helperCellCount < 0) {
+                    cells = cells.slice(0, cells.length + helperCellCount);
                 }
-                else if (helperCells > 1) {
-                    cells = cells.slice(0, helperCells - 1);
+                else if (helperCellCount > 1) {
+                    cells = cells.slice(0, helperCellCount - 1);
                 }
             }
+
+            if (!helperCellCount && helperCells) {
+                cells = cells.filter(helperCells);
+            }
+
             cells.splice(0, 0, hc); // insert first cell
 
             this._sortCells = cells;
