@@ -15,7 +15,7 @@
 * Feel free to contact me.
 */
 (function ($) {
-    $.widget("akottr.sorttable", $.ui.sortable, {
+    $.widget("db.sorttable", $.ui.sortable, {
         widgetEventPrefix: "sorttable",
         options: {
             helper: "table",
