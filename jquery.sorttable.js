@@ -31,6 +31,20 @@
 
             if (o.helper == 'table') {
                 // if using 'table' helper
+                if (!this.setWidths) {
+                    this.setWidths = true;
+                    var items = this.items;
+                    var widths = [];
+                    for (i = 0; i < items.length; i++) {
+                        var item = $(items[i].item[0]);
+                        widths[i] = item.innerWidth() - parseInt(item.css('paddingLeft') || 0, 10) - parseInt(item.css('paddingRight') || 0, 10);
+                    }
+                    for (i = 0; i < items.length; i++) {
+                        var item = $(items[i].item[0]);
+                        item.width(widths[i]);
+                    }
+                }
+
                 return this._createHelperTable(event, this.currentItem);
             }
             else {
@@ -224,17 +238,6 @@
             el.bind('sorttablestop', this._sortStop());
 
             $.ui.sortable.prototype._create.apply(this);
-
-            var items = this.items;
-            var widths = [];
-            for (i = 0; i < items.length; i++) {
-                var item = $(items[i].item[0]);
-                widths[i] = item.innerWidth() - parseInt(item.css('paddingLeft') || 0, 10) - parseInt(item.css('paddingRight') || 0, 10);
-            }
-            for (i = 0; i < items.length; i++) {
-                var item = $(items[i].item[0]);
-                item.width(widths[i]);
-            }
         }
     });
 })(jQuery);
