@@ -1,10 +1,10 @@
 ﻿/*!
 * sorttable
 *
-* @Version 1.0.2
+* @Version 1.0.3
 *
-* Copyright (c) 2011, David Brink dbrink@gmail.com
-* Copyright (c) 2010, Andres Koetter akottr@gmail.com
+* Copyright (c) 2013, David Brink dbrink@gmail.com
+* Copyright (c) 2010, Andres Koetter 
 * Dual licensed under the MIT (MIT-LICENSE.txt)
 * and GPL (GPL-LICENSE.txt) licenses.
 *
@@ -15,7 +15,7 @@
 * Feel free to contact me.
 */
 (function ($) {
-    $.widget("db.sorttable", $.ui.sortable, {
+    $.widget("extend.sorttable", $.ui.sortable, {
         widgetEventPrefix: "sorttable",
         options: {
             helper: "table",
@@ -88,9 +88,10 @@
             var tableClone = table.clone().empty();
             tableClone.css('position', 'absolute');
             tableClone.css('width', 'auto');
+            tableClone.css('min-width', 'auto');
             tableClone.css('height', 'auto');
+            tableClone.css('min-height', 'auto');
             tableClone.attr('id', '');
-
             for (i = 0; i < cells.length; i++) {
                 var cell = cells[i];
                 if (!(cell instanceof jQuery)) {
@@ -100,7 +101,8 @@
                 var cellClone = cell.clone();
                 cellClone.width(hcWidth);
                 var trClone = tr.clone().empty();
-                trClone.height(tr.innerHeight() - parseInt(tr.css('paddingTop') || 0, 10) - parseInt(tr.css('paddingBottom') || 0, 10));
+                var trHeight = tr.innerHeight() - parseInt(tr.css('paddingTop') || 0, 10) - parseInt(tr.css('paddingBottom') || 0, 10);
+                trClone.height(trHeight);
                 cellClone.appendTo(trClone.appendTo(tableClone));
             }
 
@@ -133,11 +135,6 @@
                 var rowSpan = self._placeholderRowSpan;
                 if (rowSpan > 1) {
                     p.attr('rowSpan', rowSpan);
-                }
-
-                if ($.browser.webkit) {
-                    // chrome (maybe all webkit) gets crazy when hiding a table-cell
-                    this._reAttach(this.element);
                 }
             }
         },
@@ -181,16 +178,6 @@
             return function () {
                 _this._bubbleCols();
             };
-        },
-        _reAttach: function (el) {
-            var unwrap = el[0], parent = unwrap.parentNode, next = unwrap.nextSibling;
-            el.detach();
-            if (next) {
-                parent.insertBefore(unwrap, next);
-            }
-            else {
-                parent.appendChild(unwrap);
-            }
         },
         _sortStart: function () {
             var _this = this;
@@ -238,6 +225,10 @@
             el.bind('sorttablestop', this._sortStop());
 
             $.ui.sortable.prototype._create.apply(this);
+        },
+        destroy: function () {
+            $.Widget.prototype.destroy.apply(this, arguments); // default destroy
+            // now do other stuff particular to this widget
         }
     });
 })(jQuery);
