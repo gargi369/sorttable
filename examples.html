@@ -1,37 +1,33 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
     <title>.sorttable Examples</title>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js" type="text/javascript"></script> 
-	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.js" type="text/javascript"></script> 
-    <link rel="Stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/redmond/jquery-ui.css" type="text/css" />
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js" type="text/javascript"></script> 
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.js" type="text/javascript"></script> 
+    <link rel="Stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/redmond/jquery-ui.css" type="text/css" />
 
     <style type="text/css">
-        .ui-resizable {
-        }    
+
     </style>
 
 	<script src="jquery.sorttable.js" type="text/javascript"></script> 
 	<script type="text/javascript">
-        $(function () {
+	    $(function () {
+	        $('th').resizable({
+	            create: function (event, ui) {
+	                var nodeName = this.nodeName.toUpperCase();
+	                if (nodeName == 'TH' || nodeName == 'TD') {
+	                    var self = $(this);
+	                    self.removeClass('ui-resizable');
+	                    (self.data('ui-resizable') | self.data('resizable')).element = self.wrapInner('<div class="ui-resizable"/>');
+	                    self.resizable('option', 'alsoResize', this.parentNode);
+	                }
+	            },
+	            handles: 'e'
+	        });
+
             $('#ex1').sorttable({
             }).disableSelection();
-
-//            $('#ex1 tr:first > th').resizable({
-//                handles: 'e'
-//            });
-
-            $('th').resizable({
-                create: function(event, ui) { 
-                    var nodeName = this.nodeName.toUpperCase();
-                    if (nodeName == 'TH' || nodeName == 'TD') {
-                        var self = $(this);
-                        self.resizable('element', self.wrapInner('<div class="ui-resizable"/>'));
-                        self.resizable( 'option', 'alsoResize', this.parentNode );
-                    }
-                },
-                handles: 'e'
-            });
 
             $('#ex2').sorttable({
                 handle: '.draghandle', // drag using handle
@@ -64,7 +60,6 @@
             }).disableSelection();
 
             $('#ex8').sorttable({
-                revert: true,
                 placeholder: 'placeholder',
                 start: function (e, ui) { ui.item.parents('table:first').children().find('>tr:not(.ui-sortable)').fadeTo('slow', 0.25); },
                 stop: function (e, ui) { ui.item.parents('table:first').children().find('>tr:not(.ui-sortable)').fadeTo('fast', 1); }
@@ -140,7 +135,7 @@
 	</style>
 </head>
 <body class="body">
-    <a href="https://github.com/dbrink/dragtable/zipball/master">Download Latest</a>
+    <a href="https://github.com/dbrink/sorttable/archive/master.zip">Download Latest</a>
 
     <div class="example">
         <div class="header">
@@ -155,7 +150,7 @@ $('#ex1').sorttable({
 }).disableSelection();
 </code></pre>
         </div>
-	    <table id="ex1" style="ui-widget-content">
+	    <table id="ex1">
 		    <tbody>
 			    <tr class="headerrow">
 				    <th><div class="resize">header 1</div></th>
@@ -295,7 +290,7 @@ $('#ex5').sorttable({
     </div>
     <div class="example">
         <div class="header">
-            helperCells < 0
+            helperCells &lt; 0
         </div>
         <div class="description">
             Specifies how many cells from the bottom within the column should not be dragged.  Using a negative value is useful for footer rows that should not be moved.
@@ -368,7 +363,6 @@ $('#ex7').sorttable({
         <div class="code">
 <pre><code>
 $('#ex8').sorttable({
-    revert: true,
     placeholder: 'placeholder',
     start: function (e, ui) { ui.item.parents('table:first').children().find('>tr:not(.ui-sortable)').fadeTo('slow', 0.25); },
     stop: function (e, ui) { ui.item.parents('table:first').children().find('>tr:not(.ui-sortable)').fadeTo('fast', 1); }
