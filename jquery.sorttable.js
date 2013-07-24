@@ -88,9 +88,9 @@
             var tableClone = table.clone().empty();
             tableClone.css('position', 'absolute');
             tableClone.css('width', 'auto');
-            tableClone.css('min-width', 'auto');
+            tableClone.css('min-width', 'inherit');
             tableClone.css('height', 'auto');
-            tableClone.css('min-height', 'auto');
+            tableClone.css('min-height', 'inherit');
             tableClone.attr('id', '');
             for (i = 0; i < cells.length; i++) {
                 var cell = cells[i];
