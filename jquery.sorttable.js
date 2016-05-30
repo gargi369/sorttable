@@ -4,13 +4,13 @@
 * @Version 1.0.3
 *
 * Copyright (c) 2013, David Brink dbrink@gmail.com
-* Copyright (c) 2010, Andres Koetter 
+* Copyright (c) 2010, Andres Koetter
 * Dual licensed under the MIT (MIT-LICENSE.txt)
 * and GPL (GPL-LICENSE.txt) licenses.
 *
 * Inspired by the the dragtable from Dan Vanderkam (danvk.org/dragtable/)
 * Thanks to the jquery and jqueryui comitters
-* 
+*
 * Any comment, bug report, feature-request is welcome
 * Feel free to contact me.
 */
@@ -19,7 +19,9 @@
         widgetEventPrefix: "sorttable",
         options: {
             helper: "table",
-            helperCells: 1
+            helperCells: 1,
+            helperTableId: null, //put your table ID for work AJAX
+            ajaxUrl: null //here put your URL
         },
         _table: null,
         _startIndex: 0,
@@ -148,6 +150,7 @@
         },
         // bubble the moved col left or right
         _bubbleCols: function () {
+            var _this = this;
             var from = this._startIndex;
             var to = this._endIndex;
             /* Find children thead and tbody.
@@ -172,6 +175,24 @@
                     }
                 }
             }
+            //get new columns order from TH
+            new_columns_order = "";
+            $(this.options.helperTableId).find("th.specific").each( function(index) {
+                new_columns_order += $( this ).attr("id") + " ";
+            });
+            //use ajax to write new order in database
+            $.ajax({
+                type: "POST",
+                url: this.options.ajaxUrl,
+                data: {
+                    module: window.location.pathname,
+                    new_columns_order: new_columns_order,
+                    _token: $(document).find("[name='_token']").val()
+                },
+                success: function(data) {
+                    console.log(data)
+                }
+            });
         },
         _rearrangeTableBackroundProcessing: function () {
             var _this = this;
